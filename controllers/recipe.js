@@ -83,6 +83,9 @@ exports.getAllrecipies = (req, res,next) => {
   //search controller by name
   exports.getRecipeByName=(req,res,next)=>{
     const searchField = req.query.recipename;
+    if(!searchField){
+      return res.status(400).json({msg:"enter recipe name"})
+    }
     Recipedata.find({recipename:{$regex:searchField,$options:'$i'}})
     .then(data=>{
       return res.status(200).json(data)
@@ -112,41 +115,39 @@ exports.deleteRecipie =(req,res,next)=>{
 
 //update Controller
 exports.updateRecipies=(req,res,next)=>{
-    let id= req.params.id
-    const {
-      recipename,
-      cuisinetype,
-      recipetype,
-      description,
-      calories,
-      recipedate,
-      ingredient,
-      preparationtime,
-    } = req.body;
-    const file = req.files.photo
-    if(!req.files)
-    {
-        res.status(400).json({msg:"File was not found"});
-        return;
+  const id= req.params.id
+
+  const {
+    recipename,
+    cuisinetype,
+    recipetype,
+    description,
+    calories,
+    recipedate,
+    ingredient,
+    preparationtime,
+  } = req.body;
+  const file = req.files.photo
+  if(!req.files)
+  {
+      res.status(400).json({msg:"File was not found"});
+      return;
+  }
+  // Create custom filename
+  //console.log("files",file)
+
+  let shortId=shortid.generate()
+  file.name = `photo_${shortId}_${file.name}`;
+
+  file.mv(`uploads/${file.name}`, async err => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({err:"problem with image"})
     }
-    // Create custom filename
-    //console.log("files",file)
-  
-    let shortId=shortid.generate()
-    file.name = `photo_${shortId}_${file.name}`;
-  
-    file.mv(`uploads/${file.name}`, async err => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({err:"problem with image"})
-      }
-    
-   
-  })  
   let photo=file.name;//.file
-   
-  
-  let recipedata = new Recipedata({
+ 
+
+  const recipedata = new Recipedata({
     recipename,
     cuisinetype,
     recipetype,
@@ -157,15 +158,14 @@ exports.updateRecipies=(req,res,next)=>{
     preparationtime,
     photo
   });
-  console.log("recipe",recipedata)
-      Recipedata.findByIdAndUpdate(id,{recipedata}
-        ,{new:true})
-        .then((data)=>{
-          return res.status(200).json({data,msg:"updation successfull."})
-        })
-        .catch((err=>{
-          return res.status(400).json({err,msg:err.message})
-        }))
+ 
+  Recipedata.findByIdAndUpdate(id,{recipedata},{new:true})
+  .exec((error,data)=>{
+     if (error) return res.status(400).json({ error });
+     if(data)  res.status(201).json({ msg:"recipe updated successfully!",data,
+    }); 
+  })
+ })
 }
 
 

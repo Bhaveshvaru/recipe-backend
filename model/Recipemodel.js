@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Schema;
 const recipeSchema = new mongoose.Schema(
   {
-      recipeId:{
-        type:ObjectId,
-      },
+      // recipeId:{
+      //   type:ObjectId,
+      // },
     recipename: {
       type: String,
       required: true,

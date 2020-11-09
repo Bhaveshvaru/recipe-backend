@@ -1,5 +1,5 @@
 {
-  "name": "recipe",
+  "name": "recipe-backend",
   "version": "1.0.0",
   "description": "recipe app",
   "main": "index.js",
